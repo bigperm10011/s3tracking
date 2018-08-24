@@ -24,13 +24,13 @@ class QuotesSpider(scrapy.Spider):
         if len(fresh_lvr) > 0:
             for l in fresh_lvr:
                 lid = l.id
-                url = 'https://www.google.com/search?q=' + l.llink + ' ' + 'filter=0'
+                url = 'https://www.google.com/search?q=' + l.link + ' ' + 'filter=0'
 
                 yield scrapy.Request(url=url, callback=self.parse, meta={'lid': l.id, 'name': l.name})
         else:
             for l in lvr:
                 lid = l.id
-                url = 'https://www.google.com/search?q=' + l.llink + ' ' + 'filter=0'
+                url = 'https://www.google.com/search?q=' + l.link + ' ' + 'filter=0'
 
                 yield scrapy.Request(url=url, callback=self.parse, meta={'lid': l.id, 'name': l.name})
 
