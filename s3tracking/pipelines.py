@@ -49,14 +49,15 @@ class S3TrackingPipeline(object):
                     checked.append(l)
                 if l.leaverrole != l.trackrole or l.leaverfirm != l.trackfirm:
                     l.result = 'TrackAlert'
-                    sesh.commit()
                     changed.append(l)
+                    sesh.commit()
             except:
                 if l.leaverrole != l.trackrole or l.leaverfirm != l.trackfirm:
+                    changed.append(l)
                     l.result = 'TrackAlert'
                     print('!!!!  ALERT  !!!!', l.name)
                     sesh.commit()
-                    changed.append(l)
+
 
         if len(changed) > 0:
             html2 = htmldos(changed)
