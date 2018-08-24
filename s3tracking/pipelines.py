@@ -48,6 +48,8 @@ class S3TrackingPipeline(object):
                 if date == today:
                     checked.append(l)
                 if l.leaverrole != l.trackrole or l.leaverfirm != l.trackfirm:
+                    l.result = 'TrackAlert'
+                    sesh.commit()
                     changed.append(l)
             except:
                 pass
