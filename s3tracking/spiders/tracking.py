@@ -16,8 +16,8 @@ from helpers import load_tables, remove_html_markup, clean_string, score_name, f
 class QuotesSpider(scrapy.Spider):
     name = "tracking"
     sesh, Suspect, Leaver = load_tables()
-    fresh_lvr = sesh.query(Leaver).filter_by(result='Tracking', lasttracked=None, inprosshell='Yes').limit(5).all()
-    lvr = sesh.query(Leaver).filter_by(result='Tracking', inprosshell='Yes').order_by(Leaver.lasttracked).limit(5).all()
+    fresh_lvr = sesh.query(Leaver).filter_by(result='Tracking', inprosshell='Yes').order_by(desc(Leaver.lasttracked)).limit(5).all()
+    lvr = sesh.query(Leaver).filter_by(result='Tracking', inprosshell='Yes').order_by(desc(Leaver.lasttracked)).limit(5).all()
 
     def start_requests(self, sesh=sesh, Leaver=Leaver, lvr=lvr, fresh_lvr=fresh_lvr):
         print('***** Number of Fresh Leavers Not Yet Tracked: ', len(fresh_lvr))
@@ -69,8 +69,10 @@ class QuotesSpider(scrapy.Spider):
                         item['firm'] = firm1
                     score = score_name(item['name'], db_name)
                     if score > 80:
+                        print('Passing Sore: ', score)
                         yield item
                     else:
+                        print('Failing Score: ', score)
                         yield None
 
                 else:
@@ -81,7 +83,7 @@ class QuotesSpider(scrapy.Spider):
                     print('st class converted to string: ', salvage_string)
                     cleaned_str = clean_string(salvage_string, name)
                     print('st string filtered: ', cleaned_str)
-                    item = TrackItem()
+                    item = S3TrackingItem()
                     item['name'] = name
                     item['link'] = clink
                     item['location'] = None
@@ -96,11 +98,16 @@ class QuotesSpider(scrapy.Spider):
                         if salvage_len < 100:
                             item['firm'] = salvage_len
                         else:
-                            item['firm'] = None
+                            try:
+                                item['firm'] = salvage_len[:98]
+                            except:
+                                item['firm'] = None
                     else:
                         item['firm'] = firm1
                     score = score_name(item['name'], db_name)
                     if score > 80:
+                        print('Passing Sore: ', score)
                         yield item
                     else:
+                        print('Failing Score: ', score)
                         yield None

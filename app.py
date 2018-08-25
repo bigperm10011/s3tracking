@@ -1,5 +1,5 @@
 from scrapy.crawler import CrawlerProcess
-from scraptrack.spiders import tracking
+from s3tracking.spiders import tracking
 from scrapy.utils.project import get_project_settings
 #from top_post_emailer import email_last_scraped_date
 

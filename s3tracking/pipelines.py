@@ -23,6 +23,7 @@ class S3TrackingPipeline(object):
             lvr.tracklocation = item['location']
             lvr.trackrole = item['role']
             try:
+                print('!!!! SESSION COMMITTING !!!!')
                 sesh.commit()
                 print('Result Saved. DB Updated')
                 print('.')
@@ -34,6 +35,9 @@ class S3TrackingPipeline(object):
                 print('except....', item['name'])
             print('***** Pipeline Processing Complete ******')
             return item
+        else:
+            print("Link Doesn't Match!")
+            return None
 
     def close_spider(self, spider):
         sesh = spider.sesh
@@ -47,23 +51,34 @@ class S3TrackingPipeline(object):
                 date = timestamp.date()
                 if date == today:
                     checked.append(l)
-                if l.leaverrole != l.trackrole or l.leaverfirm != l.trackfirm:
+                if l.lasttracked != None and l.leaverrole != l.trackrole:
                     l.result = 'TrackAlert'
+                    changed.append(l)
+                    sesh.commit()
+                elif l.lasttracked != None and l.leaverfirm != l.trackfirm:
+                    l.result = 'TrackAlert'
+                    print('!!! ALERT 1 !!!')
                     changed.append(l)
                     sesh.commit()
             except:
-                if l.leaverrole != l.trackrole or l.leaverfirm != l.trackfirm:
-                    changed.append(l)
+                if l.lasttracked != None and l.leaverrole != l.trackrole:
                     l.result = 'TrackAlert'
-                    print('!!!!  ALERT  !!!!', l.name)
+                    print('!!! ALERT 2 !!!')
+                    changed.append(l)
+                    sesh.commit()
+                elif l.lasttracked != None and l.leaverfirm != l.trackfirm:
+                    l.result = 'TrackAlert'
+                    changed.append(l)
                     sesh.commit()
 
-
-        if len(changed) > 0:
-            html2 = htmldos(changed)
-            resp_code2 = send_mail(html2)
-            print(resp_code2)
-        if len(checked) > 0:
-            html = gen_html(checked)
-            resp_code = send_mail(html)
-            print(resp_code)
+        try:
+            if len(changed) > 0:
+                html2 = htmldos(changed)
+                resp_code2 = send_mail(html2)
+                print(resp_code2)
+            if len(checked) > 0:
+                html = gen_html(checked)
+                resp_code = send_mail(html)
+                print(resp_code)
+        except:
+            print('Emails Not Sent')
