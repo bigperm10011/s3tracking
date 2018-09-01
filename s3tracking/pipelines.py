@@ -17,14 +17,18 @@ class S3TrackingPipeline(object):
         print('Link on File: ', lvr.link)
         print('Link Found: ', item['link'])
         if lvr.link == item['link']:
-            ts_format = datetime.datetime.now(datetime.timezone.utc).isoformat()
-            lvr.lasttracked = ts_format
+            print('Match!!!')
             lvr.trackfirm = item['firm']
             lvr.tracklocation = item['location']
             lvr.trackrole = item['role']
             try:
-                print('!!!! SESSION COMMITTING !!!!')
                 sesh.commit()
+                print('DB Updated With the following: ')
+                print('For: ', lvr.name)
+                print('Tracking Firm: ', lvr.trackfirm)
+                print('Tracking Location: ', lvr.tracklocation)
+                print('Tracking Role: ', lvr.trackrole)
+                print('Tracking TimeStamp: ', lvr.lasttracked)
                 print('Result Saved. DB Updated')
                 print('.')
                 print('.')
@@ -53,23 +57,29 @@ class S3TrackingPipeline(object):
                     checked.append(l)
                 if l.lasttracked != None and l.leaverrole != l.trackrole:
                     l.result = 'TrackAlert'
+                    l.datetimeresult = datetime.datetime.now(datetime.timezone.utc).isoformat()
                     changed.append(l)
                     sesh.commit()
+                    print('!!! Role Change !!!', l.name)
                 elif l.lasttracked != None and l.leaverfirm != l.trackfirm:
                     l.result = 'TrackAlert'
-                    print('!!! ALERT 1 !!!')
+                    l.datetimeresult = datetime.datetime.now(datetime.timezone.utc).isoformat()
                     changed.append(l)
                     sesh.commit()
+                    print('!!! Firm Change !!!', l.name)
             except:
                 if l.lasttracked != None and l.leaverrole != l.trackrole:
                     l.result = 'TrackAlert'
-                    print('!!! ALERT 2 !!!')
+                    l.datetimeresult = datetime.datetime.now(datetime.timezone.utc).isoformat()
                     changed.append(l)
                     sesh.commit()
+                    print('!!! Role Change !!!', l.name)
                 elif l.lasttracked != None and l.leaverfirm != l.trackfirm:
                     l.result = 'TrackAlert'
+                    l.datetimeresult = datetime.datetime.now(datetime.timezone.utc).isoformat()
                     changed.append(l)
                     sesh.commit()
+                    print('!!! Firm Change !!!', l.name)
 
         try:
             if len(changed) > 0:

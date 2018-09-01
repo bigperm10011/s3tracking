@@ -136,6 +136,7 @@ def clean_string(string, name):
     print('******Clean String Started*******')
     first = name.split(' ')[0].lower()
     name = name.lower()
+    name_w_s = name + 's'
     print('state of string before filtering: ', string)
     view_stmt = 'view ' + name + 's full profile'
     view1_stmt = 'view ' + name + 's profile'
@@ -159,13 +160,15 @@ def clean_string(string, name):
     conn_stmt = 'connections to recommended job candidates'
     activity_stmt = name + 's activity'
     world_stmt = 'the worlds largest professional'
-    trash_list = [world_stmt, activity_stmt, lnkd3_stmt, lnkd2_stmt, dsc3_stmt, dsc2_stmt, lang2_stmt, conn_stmt, view_stmt, view1_stmt, view2_stmt, lnkd_stmt, dif_stmt, help_stmt, dsc_stmt, join_stmt, find_stmt, complete_stmt, partial_stmt, generic_stmt, lang_stmt, slang_stmt]
+    name_string = name
+    on_stmt = 'on their profile'
+    trash_list = [world_stmt, activity_stmt, dsc3_stmt, dsc2_stmt, lang2_stmt, conn_stmt, view_stmt, view1_stmt, view2_stmt, lnkd_stmt, dif_stmt, help_stmt, dsc_stmt, join_stmt, find_stmt, complete_stmt, partial_stmt, generic_stmt, lang_stmt, slang_stmt, name_w_s, name_string, lnkd3_stmt, lnkd2_stmt, on_stmt]
 
     for i in trash_list:
         if i in string:
-            print('statement found in string: ', i)
             string = string.replace(i, '')
-            print('Trash List Removed: ', i)
+            print('Found and Removed: ', i)
+    print('Salvaged Text FINAL: ', string)
     print('******Clean String Closing*******')
     return string
 
@@ -175,6 +178,7 @@ def score_name(rez_name, db_name):
     print('Names:')
     print(rez_name, db_name)
     print('ratio is: ', ratio)
+    print('*** Score_Name Complete ***')
     return ratio
 
 def find_city(text):
@@ -191,7 +195,7 @@ def find_city(text):
         return None
 
 def list2string(strung):
-    print('****** list2string started*****')
+    print('****** list2string STARTING *****')
     help_list = []
     for s in strung:
         s = str(s)
@@ -205,7 +209,7 @@ def list2string(strung):
     out = re.sub(r'[^a-zA-Z0-9\s]', '', lststring)
     print('final version of string: ', out)
 
-    print('****** list2string closing*****')
+    print('****** list2string COMPLETE *****')
     return out
 
 def zone1(h3):
@@ -316,7 +320,18 @@ def zone3a(slp):
         print('possible city found. checking: ', cty)
         cty_result = find_city(cty)
         print('length of city_find result: ', len(cty_result))
-        if len(cty_result) == 0:
+        if cty_result:
+            print('city verified: ', cty_result)
+            city = cty_result
+            role = None
+            firm = slp_lst[1].strip()
+            print('city/firm found')
+            print(city)
+            print(firm)
+            print('*** Zone3a Analysis Complete ***')
+            return city, role, firm
+
+        else:
             city = cty.strip()
             role = None
             firm = slp_lst[1].strip()
@@ -325,23 +340,15 @@ def zone3a(slp):
             print(firm)
             print('*** Zone3a Analysis Complete ***')
             return city, role, firm
-        else:
-            print('city verified: ', cty_result)
-            city = cty_result[0]
-            role = None
-            firm = slp_lst[1].strip()
-            print('city/firm found')
-            print(city)
-            print(firm)
-            print('*** Zone3a Analysis Complete ***')
-            return city, role, firm
+
     elif len(slp_lst) == 3:
         print('slp_list is 3')
         cty = slp_lst[0].strip()
         print('possible city found. checking: ', cty)
         cty_result = find_city(cty)
-        if len(cty_result) == 0:
-            city = cty.strip()
+        if cty_result:
+            print('city verified: ', cty_result)
+            city = cty_result[0]
             role = slp_lst[1].strip()
             firm = slp_lst[2].strip()
             print('city/role/firm found')
@@ -350,9 +357,9 @@ def zone3a(slp):
             print(firm)
             print('*** Zone3a Analysis Complete ***')
             return city, role, firm
+
         else:
-            print('city verified: ', cty_result)
-            city = cty_result[0]
+            city = cty.strip()
             role = slp_lst[1].strip()
             firm = slp_lst[2].strip()
             print('city/role/firm found')
@@ -367,18 +374,7 @@ def zone3a(slp):
         cty = slp_lst[0].strip()
         print('possible city found. checking: ', cty)
         cty_result = find_city(cty)
-        if len(cty_result) == 0:
-            print('Warning: City Not Found: ', cty_result)
-            city = cty.strip()
-            role = slp_lst[1].strip() + ' ' + slp_lst[2].strip()
-            firm = slp_lst[3].strip()
-            print('city/role/firm found')
-            print(city)
-            print(role)
-            print(firm)
-            print('*** Zone3a Analysis Complete ***')
-            return city, role, firm
-        else:
+        if cty_result:
             print('city verified: ', cty_result)
             city = cty_result[0]
             role = slp_lst[1].strip() + ' ' + slp_lst[2].strip()
@@ -389,6 +385,18 @@ def zone3a(slp):
             print(firm)
             print('*** Zone3a Analysis Complete ***')
             return city, role, firm
+        else:
+            print('Warning: City Not Found: ', cty_result)
+            city = cty.strip()
+            role = slp_lst[1].strip() + ' ' + slp_lst[2].strip()
+            firm = slp_lst[3].strip()
+            print('city/role/firm found')
+            print(city)
+            print(role)
+            print(firm)
+            print('*** Zone3a Analysis Complete ***')
+            return city, role, firm
+
 
     else:
         print('slp_list is None')
