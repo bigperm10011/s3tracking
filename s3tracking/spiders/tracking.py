@@ -17,7 +17,7 @@ class QuotesSpider(scrapy.Spider):
     name = "tracking"
     sesh, Suspect, Leaver = load_tables()
     fresh_lvr = sesh.query(Leaver).filter_by(result='Tracking', inprosshell='Yes', lasttracked=None).limit(5).all()
-    lvr = sesh.query(Leaver).filter_by(result='Tracking', inprosshell='Yes').order_by(desc(Leaver.lasttracked)).limit(5).all()
+    lvr = sesh.query(Leaver).filter_by(result='Tracking').order_by(desc(Leaver.lasttracked)).limit(5).all()
     print('------> Number of First Time Tracks: ', len(fresh_lvr))
     print('------> Number of Re-Tracks: ', len(lvr))
 
