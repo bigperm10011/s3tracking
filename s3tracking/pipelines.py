@@ -58,12 +58,14 @@ class S3TrackingPipeline(object):
                     if l.lasttracked != None and l.leaverrole != l.trackrole:
                         l.result = 'TrackAlert'
                         l.datetimeresult = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                        l.trackend = datetime.datetime.now(datetime.timezone.utc).isoformat()
                         changed.append(l)
                         sesh.commit()
                         print('!!! Role Change !!!', l.name)
                     elif l.lasttracked != None and l.leaverfirm != l.trackfirm:
                         l.result = 'TrackAlert'
                         l.datetimeresult = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                        l.trackend = datetime.datetime.now(datetime.timezone.utc).isoformat()
                         changed.append(l)
                         sesh.commit()
                         print('!!! Firm Change !!!', l.name)
