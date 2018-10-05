@@ -12,6 +12,7 @@ from fuzzywuzzy import fuzz
 from geotext import GeoText
 import re
 import html
+import datetime
 
 
 def send_mail(body):
@@ -180,6 +181,26 @@ def score_name(rez_name, db_name):
     print('ratio is: ', ratio)
     print('*** Score_Name Complete ***')
     return ratio
+
+def compare_score(one, two):
+    if one and two == None:
+        return 'No Data'
+    elif two == None:
+        return 'No Data'
+    elif one == None and two != None:
+        return 'Update'
+    else:
+        ratio = fuzz.ratio(one.lower(), two.lower())
+        print('Comparing:')
+        print(one, two)
+        print('ratio is: ', ratio)
+        return ratio
+
+def track_alert(t, sesh):
+    t.result = 'TrackAlert'
+    t.trackend = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    sesh.commit()
+    return t
 
 def find_city(text):
     print('**Find City Started**')

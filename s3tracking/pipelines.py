@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import mapper, sessionmaker
 
-from helpers import send_mail, load_tables, gen_html, htmldos
+from helpers import send_mail, load_tables, gen_html, htmldos, compare_score, track_alert
 
 class S3TrackingPipeline(object):
     def process_item(self, item, spider):
@@ -45,32 +45,39 @@ class S3TrackingPipeline(object):
 
     def close_spider(self, spider):
         sesh = spider.sesh
-        lvrs = sesh.query(spider.Leaver).filter_by(inprosshell='Yes').all()
+        tracking = sesh.query(spider.Leaver).filter_by(result='Tracking').all()
         today = datetime.date.today()
         checked = []
         changed = []
-        for l in lvrs:
-            timestamp = l.lasttracked
-            try:
-                date = timestamp.date()
-                if date == today:
-                    checked.append(l)
-                    if l.lasttracked != None and l.leaverrole != l.trackrole:
-                        l.result = 'TrackAlert'
-                        l.datetimeresult = datetime.datetime.now(datetime.timezone.utc).isoformat()
-                        l.trackend = datetime.datetime.now(datetime.timezone.utc).isoformat()
-                        changed.append(l)
-                        sesh.commit()
-                        print('!!! Role Change !!!', l.name)
-                    elif l.lasttracked != None and l.leaverfirm != l.trackfirm:
-                        l.result = 'TrackAlert'
-                        l.datetimeresult = datetime.datetime.now(datetime.timezone.utc).isoformat()
-                        l.trackend = datetime.datetime.now(datetime.timezone.utc).isoformat()
-                        changed.append(l)
-                        sesh.commit()
-                        print('!!! Firm Change !!!', l.name)
-            except:
-                pass
+        for t in tracking:
+            print('>>>>>>>', t.name)
+            timestamp = t.lasttracked.date()
+            if timestamp == today:
+                checked.append(t)
+
+            role_score = compare_score(t.leaverrole, t.trackrole)
+            if role_score == 'No Data':
+                print('Role Has no Data to Compare')
+            elif role_score == 'Update':
+                print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Change Detected: %s and %s' %(t.leaverrole,t.trackrole))
+                changed.append(track_alert(t, sesh))
+            elif role_score < 50:
+                print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Change Detected: %s and %s' %(t.leaverrole,t.trackrole))
+                changed.append(track_alert(t, sesh))
+            else:
+                print('No Change to Role')
+
+            firm_score = compare_score(t.leaverfirm, t.trackfirm)
+            if firm_score == 'No Data':
+                print('Firm Has no Data to Compare')
+            elif firm_score == 'Update':
+                print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Change Detected: %s and %s' %(t.leaverfirm,t.trackfirm))
+                changed.append(track_alert(t, sesh))
+            elif firm_score < 50:
+                print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Change Detected: %s and %s' %(t.leaverfirm,t.trackfirm))
+                changed.append(track_alert(t, sesh))
+            else:
+                print('>>No Change to Firm')
 
         try:
             if len(changed) > 0:
