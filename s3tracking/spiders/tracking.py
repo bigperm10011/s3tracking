@@ -17,14 +17,15 @@ class QuotesSpider(scrapy.Spider):
     name = "tracking"
     sesh, Suspect, Leaver = load_tables()
     fresh_lvr = sesh.query(Leaver).filter_by(result='Tracking', inprosshell='Yes', lasttracked=None).limit(5).all()
-    lvr = sesh.query(Leaver).filter_by(result='Tracking').order_by(desc(Leaver.lasttracked)).limit(5).all()
+    lvr = sesh.query(Leaver).filter_by(result='Tracking').order_by(Leaver.lasttracked).limit(5).all()
     print('------> Number of First Time Tracks: ', len(fresh_lvr))
     print('------> Number of Re-Tracks: ', len(lvr))
 
     def start_requests(self, sesh=sesh, Leaver=Leaver, lvr=lvr, fresh_lvr=fresh_lvr):
-        print('***** Number of Fresh Leavers Not Yet Tracked: ', len(fresh_lvr))
+        print('*********** Leavers To Be Tracked **********')
         if len(fresh_lvr) > 0:
             for l in fresh_lvr:
+                print(l.name)
                 lid = l.id
                 try:
                     old_firm_full = l.prosfirm
@@ -45,6 +46,7 @@ class QuotesSpider(scrapy.Spider):
                     yield scrapy.Request(url=url, callback=self.parse, meta={'lid': l.id, 'name': l.name, 'truelink': l.link})
         else:
             for l in lvr:
+                print(l.name)
                 lid = l.id
                 try:
                     old_firm_full = l.prosfirm
